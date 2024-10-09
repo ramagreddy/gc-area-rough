@@ -1,0 +1,15 @@
+import pandas as pd
+
+# Load the existing CSV with wrap-up codes
+existing_wrapups = pd.read_csv('wrapup_codes.csv')
+
+# Load the CSV with wrap-up codes to delete
+delete_wrapups = pd.read_csv('input.csv')
+
+# Filter out the wrap-up codes listed in the delete file
+filtered_wrapups = existing_wrapups[~existing_wrapups['name'].isin(delete_wrapups['name'])]
+
+# Save the updated CSV
+filtered_wrapups.to_csv('wrapup_codes.csv', index=False)
+
+print("Wrap-up codes deleted successfully!")
