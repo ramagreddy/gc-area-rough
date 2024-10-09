@@ -1,0 +1,18 @@
+import pandas as pd
+
+# Load the existing CSV with wrap-up codes
+existing_wrapups = pd.read_csv('wrapup_codes.csv')
+
+# Load the CSV with the mapping of old wrap-up codes to new wrap-up codes
+rename_mapping = pd.read_csv('input.csv')
+
+# Convert the rename mapping to a dictionary {old_code: new_code}
+mapping_dict = dict(zip(rename_mapping['current_name'], rename_mapping['new_name']))
+
+# Replace the wrap-up codes in the existing CSV using the mapping
+existing_wrapups['name'] = existing_wrapups['name'].replace(mapping_dict)
+
+# Save the updated CSV
+existing_wrapups.to_csv('wrapup_codes.csv', index=False)
+
+print("Wrap-up codes updated successfully!")
