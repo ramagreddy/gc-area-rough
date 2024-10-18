@@ -1,0 +1,56 @@
+resource "genesyscloud_routing_wrapupcode" "wrapup_codes_new2" {
+  for_each = data.external.wrapup_codes.result
+
+  # Decode the JSON string into a map
+  name           = jsondecode(each.value)["name"]
+  division_id    = data.genesyscloud_auth_division.divisions[jsondecode(each.value)["division"]].id
+
+}
+
+
+#data "genesyscloud_routing_wrapupcode" "existing-wrapupcodes" {
+#  for_each = data.external.wrapup_codes.result
+
+  # Decode the JSON string into a map
+#  name        = jsondecode(each.value)["name"]
+#}
+//
+variable "division_ids" {
+  description = "Map of wrap-up codes and their corresponding division IDs"
+  type        = map(string)
+  default = {
+    "Home"      = "3c33ce24-8085-4728-afdb-a48b6a362adc"
+    "Training"  = "126544af-2d81-43dd-9186-740c7bf4327b"
+    "All"       = "*"
+    ""          = "*" 
+  }
+}
+
+
+variable "division_ids_list" {
+  description = "Map of wrap-up codes and their corresponding division IDs"
+  type        = set(string)
+  default     = ["Home","Training","All"]
+}
+
+# Fetch division information dynamically using name from a set of names
+data "genesyscloud_auth_division" "divisions" {
+  for_each = var.division_ids_list
+  name     = each.value  # Fetch division by name
+}
+
+
+# Create wrap-up codes dynamically using for_each
+resource "genesyscloud_routing_wrapupcode" "wrapup_codes_new4" {
+  name        = "dev-test4"  # Wrap-up code name
+  division_id = data.genesyscloud_auth_division.divisions["Home"].id  # Fetch division ID dynamically
+}
+
+
+output "all_divisions" {
+  value = data.genesyscloud_auth_division.divisions
+}
+
+output "all_wrapupcodes" {
+  value = data.external.wrapup_codes.result
+}
