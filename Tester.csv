@@ -1,0 +1,6 @@
+domain,entity,action
+analytics,conversationDetail,view
+analytics,reporting,view
+directory,user,view
+routing,queue,view
+quality,evaluation,view
