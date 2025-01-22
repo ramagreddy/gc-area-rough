@@ -1,22 +1,20 @@
-import os
 import csv
 import sys
 import json
 
-def parse_csv(folder_path):
-    roles = {}
-    for filename in os.listdir(folder_path):
-        if filename.endswith(".csv"):
-            role_name = os.path.splitext(filename)[0]  # Role name from file name
-            permissions = []
-            with open(os.path.join(folder_path, filename), 'r') as file:
-                reader = csv.DictReader(file)
-                for row in reader:
-                    permissions.append(f"{row['domain']}:{row['entity']}:{row['action']}")
-            roles[role_name] = permissions
-    return roles
+def parse_csv(file_path):
+    policies = []
+    with open(file_path, 'r') as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            policies.append({
+                "domain": row["domain"],
+                "entity_name": row["entity_name"],
+                "action_set": row["action_set"].split(",")  # Convert actions to a list
+            })
+    return policies
 
 if __name__ == "__main__":
-    folder_path = sys.argv[1]
-    roles = parse_csv(folder_path)
-    print(json.dumps({"roles": roles}))
+    file_path = sys.argv[1]
+    print(json.dumps({"permission_policies": parse_csv(file_path)}))
+
