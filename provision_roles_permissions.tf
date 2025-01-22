@@ -1,22 +1,26 @@
-import csv
-import sys
-import json
+provider "genesyscloud" {
+  environment  = "us-east-1" # Replace with your region
+  access_token = var.access_token
+}
 
-def parse_csv(file_path):
-    policies = []
-    with open(file_path, 'r') as file:
-        reader = csv.DictReader(file)
-        for row in reader:
-            # Convert the 'action_set' field to a list of strings
-            actions = row["action_set"].split(",")
-            policies.append({
-                "domain": row["domain"],
-                "entity_name": row["entity_name"],
-                "action_set": actions  # Ensure it's a list
-            })
-    return policies
+# External data source to load permission policies
+data "external" "permission_policies" {
+  program = ["python3", "parse_permissions.py", "permissions.csv"]
+}
 
-if __name__ == "__main__":
-    file_path = sys.argv[1]
-    print(json.dumps({"permission_policies": parse_csv(file_path)}))
+# Create the Auth Role
+resource "genesyscloud_auth_role" "agent_role" {
+  name        = "Agent Role"
+  description = "Custom Role for Agents"
+  default     = false
+
+  dynamic "permission_policies" {
+    for_each = data.external.permission_policies.result["permission_policies"]
+    content {
+      domain      = permission_policies.value["domain"]
+      entity_name = permission_policies.value["entity_name"]
+      action_set  = permission_policies.value["action_set"]  # Flat list
+    }
+  }
+}
 
