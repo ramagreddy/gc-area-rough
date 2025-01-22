@@ -3,23 +3,24 @@ provider "genesyscloud" {
   access_token = var.access_token
 }
 
-# External data source to fetch role permissions from CSV files
-data "external" "roles" {
-  program = ["python3", "parse_roles.py", "roles"]
+# Load permissions from the external script
+data "external" "permission_policies" {
+  program = ["python3", "parse_permissions.py", "permissions.csv"]
 }
 
-# Iterate over the roles and create resources dynamically
-resource "genesyscloud_auth_role" "dynamic_roles" {
-  for_each = data.external.roles.result["roles"]
-
-  name        = each.key
-  description = "Role created from CSV: ${each.key}"
+# Create the Auth Role
+resource "genesyscloud_auth_role" "agent_role" {
+  name        = "Agent Role"
+  description = "Custom Role for Agents"
   default     = false
 
-  dynamic "permissions" {
-    for_each = each.value
+  dynamic "permission_policies" {
+    for_each = data.external.permission_policies.result["permission_policies"]
     content {
-      value = permissions.value
+      domain      = permission_policies.value["domain"]
+      entity_name = permission_policies.value["entity_name"]
+      action_set  = permission_policies.value["action_set"]
     }
   }
 }
+
