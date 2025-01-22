@@ -14,13 +14,13 @@ resource "genesyscloud_auth_role" "agent_role" {
   description = "Custom Role for Agents"
   default     = false
 
+  # Use dynamic block to process flattened permission policies
   dynamic "permission_policies" {
-    for_each = data.external.permission_policies.result["permission_policies"]
+    for_each = data.external.permission_policies.result
     content {
-      domain      = permission_policies.value["domain"]
-      entity_name = permission_policies.value["entity_name"]
-      action_set  = permission_policies.value["action_set"]  # Flat list
+      domain      = split(":", permission_policies.value)[0]
+      entity_name = split(":", permission_policies.value)[1]
+      action_set  = split(",", split(":", permission_policies.value)[2])
     }
   }
 }
-
