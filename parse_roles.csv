@@ -3,19 +3,21 @@ import sys
 import json
 
 def parse_csv(file_path):
-    policies = []
+    policies = {}
     with open(file_path, 'r') as file:
         reader = csv.DictReader(file)
-        for row in reader:
-            # Convert the 'action_set' field to a list of strings
-            actions = row["action_set"].split(",")
-            policies.append({
-                "domain": row["domain"],
-                "entity_name": row["entity_name"],
-                "action_set": actions  # Ensure it's a list
-            })
+        for idx, row in enumerate(reader):
+            # Combine data into a single string
+            key = f"policy_{idx + 1}"  # Unique key for each policy
+            value = f"{row['domain']}:{row['entity_name']}:{','.join(row['action_set'].split(','))}"
+            policies[key] = value
     return policies
 
 if __name__ == "__main__":
     file_path = sys.argv[1]
-    print(json.dumps({"permission_policies": parse_csv(file_path)}))
+    try:
+        result = parse_csv(file_path)
+        print(json.dumps(result))  # Flattened key-value pairs
+    except Exception as e:
+        print(json.dumps({"error": str(e)}))
+
