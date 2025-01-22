@@ -1,6 +1,5 @@
-domain,entity,action
-analytics,conversationDetail,view
-analytics,reporting,view
-directory,user,view
-routing,queue,view
-quality,evaluation,view
+domain,entity_name,action_set
+quality,evaluation,"add,edit"
+analytics,conversationDetail,"view,delete"
+routing,queue,"create,update"
+
